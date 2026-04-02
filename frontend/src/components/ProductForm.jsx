@@ -28,19 +28,19 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
     // Validate
     const validationErrors = [];
     if (!formData.name.trim()) {
-      validationErrors.push('Name is required');
+      validationErrors.push('Tên sản phẩm là bắt buộc');
     }
     if (!formData.category.trim()) {
-      validationErrors.push('Category is required');
+      validationErrors.push('Danh mục là bắt buộc');
     }
     if (!formData.price || formData.price <= 0) {
-      validationErrors.push('Price must be greater than 0');
+      validationErrors.push('Giá phải lớn hơn 0');
     }
     if (!formData.image.trim()) {
-      validationErrors.push('Image URL is required');
+      validationErrors.push('URL hình ảnh là bắt buộc');
     }
     if (formData.stock < 0) {
-      validationErrors.push('Stock cannot be negative');
+      validationErrors.push('Số lượng không được âm');
     }
 
     if (validationErrors.length > 0) {
@@ -54,7 +54,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
 
   return (
     <div className="product-form-container">
-      <h2>{product ? 'Edit Product' : 'Add New Product'}</h2>
+      <h2>{product ? 'Sửa Sản Phẩm' : 'Thêm Sản Phẩm Mới'}</h2>
       
       {errors.length > 0 && (
         <div className="error-box">
@@ -68,18 +68,18 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
 
       <form onSubmit={handleSubmit} className="product-form">
         <div className="form-group">
-          <label>Product Name *</label>
+          <label>Tên Sản Phẩm *</label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            placeholder="Enter product name"
+            placeholder="Nhập tên sản phẩm"
           />
         </div>
 
         <div className="form-group">
-          <label>Category *</label>
+          <label>Danh Mục *</label>
           <select
             name="category"
             value={formData.category}
@@ -94,7 +94,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Price (USD) *</label>
+            <label>Giá (USD) *</label>
             <input
               type="number"
               name="price"
@@ -107,7 +107,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
           </div>
 
           <div className="form-group">
-            <label>Stock Quantity *</label>
+            <label>Số Lượng *</label>
             <input
               type="number"
               name="stock"
@@ -120,7 +120,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         </div>
 
         <div className="form-group">
-          <label>Image URL *</label>
+          <label>URL Hình Ảnh *</label>
           <input
             type="text"
             name="image"
@@ -132,17 +132,17 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
 
         {formData.image && (
           <div className="form-group">
-            <label>Preview:</label>
+            <label>Xem Trước:</label>
             <img src={formData.image} alt="Preview" className="image-preview" />
           </div>
         )}
 
         <div className="form-actions">
           <button type="submit" className="btn btn-primary">
-            {product ? 'Update Product' : 'Create Product'}
+            {product ? 'Cập Nhật' : 'Tạo Sản Phẩm'}
           </button>
           <button type="button" className="btn btn-secondary" onClick={onCancel}>
-            Cancel
+            Hủy
           </button>
         </div>
       </form>
