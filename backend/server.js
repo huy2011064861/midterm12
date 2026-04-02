@@ -2,14 +2,57 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = 5000;
 const productsFile = path.join(__dirname, 'products.json');
+const usersFile = path.join(__dirname, 'users.json');
+const JWT_SECRET = 'your-secret-key-change-in-production'; // Thay đổi trong production
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Helper function to read users from JSON file
+const readUsers = () => {
+  try {
+    const data = fs.readFileSync(usersFile, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading users:', error);
+    return [];
+  }
+};
+
+// Verify JWT Token Middleware
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1]; // Bearer token
+  if (!token) {
+    return res.status(401).json({ error: 'Token required' });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(403).json({ error: 'Invalid or expired token' });
+  }
+};
+
+// Check Role Middleware
+const checkRole = (requiredRole) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+    if (req.user.role !== requiredRole) {
+      return res.status(403).json({ error: `Access denied. ${requiredRole} role required.` });
+    }
+    next();
+  };
+};
 
 // Helper function to read products from JSON file
 const readProducts = () => {
@@ -56,6 +99,42 @@ const validateProduct = (product) => {
 
 // ===== API ENDPOINTS =====
 
+// POST /login - User login endpoint
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password required' });
+  }
+
+  const users = readUsers();
+  const user = users.find(u => u.username === username && u.password === password);
+
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid username or password' });
+  }
+
+  // Generate JWT token
+  const token = jwt.sign(
+    { id: user.id, username: user.username, role: user.role, email: user.email },
+    JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+
+  res.json({
+    message: 'Login successful',
+    token,
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      email: user.email
+    }
+  });
+});
+
+// ===== API ENDPOINTS =====
+
 // GET /products - Get all products with optional filters
 app.get('/products', (req, res) => {
   let products = readProducts();
@@ -90,8 +169,8 @@ app.get('/products/:id', (req, res) => {
   res.json(product);
 });
 
-// POST /products - Create new product
-app.post('/products', (req, res) => {
+// POST /products - Create new product (Admin only)
+app.post('/products', verifyToken, checkRole('admin'), (req, res) => {
   const { name, category, price, image, stock } = req.body;
 
   // Validate input
@@ -120,8 +199,8 @@ app.post('/products', (req, res) => {
   res.status(201).json(newProduct);
 });
 
-// PUT /products/:id - Update product
-app.put('/products/:id', (req, res) => {
+// PUT /products/:id - Update product (Admin only)
+app.put('/products/:id', verifyToken, checkRole('admin'), (req, res) => {
   const products = readProducts();
   const productIndex = products.findIndex(p => p.id === parseInt(req.params.id));
 
@@ -151,8 +230,8 @@ app.put('/products/:id', (req, res) => {
   res.json(products[productIndex]);
 });
 
-// DELETE /products/:id - Delete product
-app.delete('/products/:id', (req, res) => {
+// DELETE /products/:id - Delete product (Admin only)
+app.delete('/products/:id', verifyToken, checkRole('admin'), (req, res) => {
   const products = readProducts();
   const productIndex = products.findIndex(p => p.id === parseInt(req.params.id));
 
