@@ -9,6 +9,17 @@ export const apiClient = axios.create({
   }
 });
 
+// Interceptor để tự động thêm token vào header
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 // Get all products
 export const getProducts = (filters = {}) => {
   let url = '/products';
