@@ -1,7 +1,7 @@
-export default function ProductDetail({ product, onEdit, onDelete, onBack }) {
+export default function ProductDetail({ product, onEdit, onDelete, onBack, isAdmin }) {
   return (
     <div className="product-detail">
-      <button className="btn btn-secondary" onClick={onBack}>← Back</button>
+      <button className="btn btn-secondary" onClick={onBack}>← Quay Lại</button>
       
       <div className="detail-container">
         <div className="detail-image">
@@ -10,24 +10,26 @@ export default function ProductDetail({ product, onEdit, onDelete, onBack }) {
         
         <div className="detail-info">
           <h1>{product.name}</h1>
-          <p className="detail-category">Category: <strong>{product.category}</strong></p>
+          <p className="detail-category">Danh Mục: <strong>{product.category}</strong></p>
           
           <div className="detail-price">
             <h2>${product.price.toLocaleString()}</h2>
           </div>
           
           <div className="detail-stock">
-            <p>Stock Available: <strong>{product.stock}</strong></p>
+            <p>Số Lượng Còn: <strong>{product.stock}</strong></p>
           </div>
 
           <div className="detail-id">
-            <p>Product ID: <strong>#{product.id}</strong></p>
+            <p>ID Sản Phẩm: <strong>#{product.id}</strong></p>
           </div>
 
-          <div className="detail-actions">
-            <button className="btn btn-info" onClick={onEdit}>Edit Product</button>
-            <button className="btn btn-danger" onClick={onDelete}>Delete Product</button>
-          </div>
+          {isAdmin && (
+            <div className="detail-actions">
+              <button className="btn btn-info" onClick={onEdit}>Sửa Sản Phẩm</button>
+              <button className="btn btn-danger" onClick={onDelete}>Xóa Sản Phẩm</button>
+            </div>
+          )}
         </div>
       </div>
     </div>
